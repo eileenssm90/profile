@@ -1,21 +1,6 @@
-/* eslint-disable jsx-a11y/alt-text */
 import * as React from "react";
-import ImageList from "@mui/material/ImageList";
-import ImageListItem from "@mui/material/ImageListItem";
-import ImageListItemBar from "@mui/material/ImageListItemBar";
 import targets from "../targets.js";
-import { Para, Content } from "../components/para.js";
-import { Icon } from "@mui/material";
-import AccessibilityIcon from "@mui/icons-material/Accessibility";
-import { render } from "react-dom";
-import { selectedId } from "../components/displayGrid.js";
-import { selectedIdFave } from "./favourite.js";
-
-import { SearchAppBar } from "../components/displayGrid";
-import { NavBar } from "../components/navBar.js";
 import Grid from "@mui/material/Grid";
-import Rating from "@mui/material/Rating";
-
 import List from "@mui/material/List";
 import ListItem from "@mui/material/ListItem";
 import ListItemText from "@mui/material/ListItemText";
@@ -27,13 +12,15 @@ import BeachAccessIcon from "@mui/icons-material/BeachAccess";
 import Divider from "@mui/material/Divider";
 import { useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
-import { Routes, Route, useParams } from "react-router-dom";
+import { useParams } from "react-router-dom";
+import GetNews from "../components/getNews.js";
+import Video from "../components/video.js";
 
-import Checkbox from "@mui/material/Checkbox";
-import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
-import Favorite from "@mui/icons-material/Favorite";
-import { styled, alpha } from "@mui/material/styles";
-import InputBase from "@mui/material/InputBase";
+// import Checkbox from "@mui/material/Checkbox";
+// import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
+// import Favorite from "@mui/icons-material/Favorite";
+// import { styled, alpha } from "@mui/material/styles";
+// import InputBase from "@mui/material/InputBase";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
@@ -46,7 +33,7 @@ const ReadMore = ({ children }) => {
 
   return (
     <p className="text">
-      {isReadMore ? text.slice(0, 150) : text}
+      {isReadMore ? text.slice(0, 125) : text}
       <span onClick={toggleReadMore} className="read-or-hide">
         {isReadMore ? "...read more" : " show less"}
       </span>
@@ -56,35 +43,21 @@ const ReadMore = ({ children }) => {
 
 function Dossier() {
   const [fave, setFave] = useState([]);
-  const [selectedId, setSelectedId] = useState("");
 
   let { id } = useParams();
-  console.log("param" + id);
+  // console.log("param" + id);
   id = parseInt(id);
-  console.log("id " + id);
+  // console.log("id " + id);
 
   useEffect(() => {
     const retrievedFave = JSON.parse(localStorage.getItem("fave"));
-    console.log("step 1");
-    console.log("retrieved fave" + retrievedFave);
+    // console.log("step 1");
+    // console.log("retrieved fave" + retrievedFave);
     setFave(retrievedFave);
   }, [fave.length]);
 
-  // function handleFaveClick(event, selectedId) {
-  //   let selectedIndex = parseInt(event.target.id) - 1;
-  //   console.log("selectedIndex " + selectedIndex);
-  //   fave.splice(fave.id.indexOf(selectedIndex, 1), 1);
-  //   console.log("remaining array " + fave.length);
-  //   setFave(fave);
-  //   localStorage.setItem("fave", JSON.stringify(fave));
-  //   console.log("step 2");
-  // }
-
   return (
     <>
-      {/* <div>Hello</div> */}
-      {NavBar()}
-
       <Grid
         container
         display="flex"
@@ -145,13 +118,12 @@ function Dossier() {
               secondary={<ReadMore>{targets[id - 1].engaging}</ReadMore>}
             />
           </ListItem>
+          <Video />
+          <GetNews id={id} />
         </List>
-        {console.log(id - 1)}
-        {/* <div>{Para()}</div> */}
       </Grid>
     </>
   );
 }
 
 export default Dossier;
-// Dossier();

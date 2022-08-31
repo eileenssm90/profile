@@ -73,6 +73,11 @@
   transform: scale(1.01) translateY(0.2rem);
 }
 
+.App {
+  font-family: sans-serif;
+  text-align: center;
+}
+
 @keyframes App-logo-spin {
   from {
     transform: rotate(0deg);

@@ -6,7 +6,7 @@ import ImageListItemBar from "@mui/material/ImageListItemBar";
 import "../App.css";
 import targets from "../targets.js";
 import Dossier from "../pages/dossier.js";
-import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
+import { Link } from "react-router-dom";
 import Grid from "@mui/material/Grid";
 
 import { styled, alpha } from "@mui/material/styles";
@@ -88,7 +88,7 @@ export function DisplayGrid() {
   useEffect(() => {
     const retrievedFave = JSON.parse(localStorage.getItem("fave"));
     setFave(retrievedFave);
-    console.log("card array" + cardArray);
+    // console.log("card array" + cardArray);
   }, [fave.length]);
 
   return (
@@ -118,7 +118,7 @@ export function DisplayGrid() {
           <div className="card">
             <Card sx={{ maxWidth: 345 }}>
               <CardActionArea>
-                <CardMedia />
+                <CardMedia component="img" />
                 <ImageListItem display="block">
                   <Link to={`./dossier/${profileData.id}`}>
                     <img
@@ -152,7 +152,7 @@ export function DisplayGrid() {
                           alignitems="center"
                           justifycontent="centre"
                           {...label}
-                          id={profileData.id}
+                          id={String(profileData.id)}
                           onClick={handleFaveClick}
                           icon={<FavoriteBorder />}
                           checkedIcon={<Favorite />}
@@ -160,16 +160,6 @@ export function DisplayGrid() {
                       </Grid>
                     </Grid>
                   </CardContent>
-                  {/* <Grid container display="flex">
-                    <Grid item xs={3}></Grid>
-                    <Grid
-                      item
-                      xs={2}
-                      display="flex"
-                      justifyContent="center"
-                      alignItems="center"
-                    ></Grid>
-                  </Grid> */}
                 </ImageListItem>
               </CardActionArea>
             </Card>
