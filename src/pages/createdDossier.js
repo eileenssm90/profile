@@ -13,15 +13,23 @@ import { useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
 import CreatedGetNews from "../components/createdGetNews.js";
-import { database } from "../firebase.js";
-import { doc, getDoc, updateDoc } from "firebase/firestore";
+
+import { database, storage } from "../firebase.js";
+import { doc, getDoc, updateDoc, deleteDoc } from "firebase/firestore";
+// import { collection, addDoc } from "firebase/firestore";
+import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 
 import Box from "@mui/material/Box";
 import Button from "@mui/material/Button";
 import Modal from "@mui/material/Modal";
 import EditIcon from "@mui/icons-material/Edit";
 import { EditText, EditTextarea } from "react-edit-text";
+import DeleteIcon from "@mui/icons-material/Delete";
+import { useNavigate } from "react-router-dom";
+import { ToastContainer, toast } from "react-toastify";
+import "react-toastify/dist/ReactToastify.css";
 import "react-edit-text/dist/index.css";
+import ImageListItemBar from "@mui/material/ImageListItemBar";
 
 // successfully setId, but why cannot appear here?
 const style = {
@@ -36,23 +44,6 @@ const style = {
   p: 4,
 };
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
-
-// const ReadMore = ({ children }) => {
-//   const text = children;
-//   const [isReadMore, setIsReadMore] = useState(true);
-//   const toggleReadMore = () => {
-//     setIsReadMore(!isReadMore);
-//   };
-
-//   return (
-//     <p className="text">
-//       {isReadMore ? text.slice(0, 125) : text}
-//       <span onClick={toggleReadMore} className="read-or-hide">
-//         {isReadMore ? "...read more" : " show less"}
-//       </span>
-//     </p>
-//   );
-// };
 
 function CreatedDossier({
   name,
@@ -74,24 +65,23 @@ function CreatedDossier({
   const [selectedId, setSelectedId] = useState("");
   const [singleDoc, setSingleDoc] = useState({});
   const [open, setOpen] = useState(false);
+  const [file, setFile] = useState("");
+  const [imageURL, setImageURL] = useState("");
+
   const handleOpen = () => setOpen(true);
   const handleClose = () => setOpen(false);
   const params = useParams();
+  let navigate = useNavigate();
 
+  const metadata = {
+    contentType: "image/jpeg",
+  };
+
+  //if slow to load, need a dependence for set effect
   useEffect(() => {
     setSelectedId(String(params.id));
-    console.log(selectedId);
+    // console.log(selectedId);
   }, [selectedId]);
-
-  // useEffect(() => {
-  //   const retrievedFave = JSON.parse(localStorage.getItem("fave"));
-  //   // console.log("step 1");
-  //   // console.log("retrieved fave" + retrievedFave);
-  //   setFave(retrievedFave);
-  // }, [fave.length]);
-  // useEffect(() => {
-  //   setPostList(localStorage.getItem("postList"));
-  // }, []);
 
   useEffect(() => {
     const fetchData = async () => {
@@ -99,21 +89,57 @@ function CreatedDossier({
       const docSnap = await getDoc(docRef);
       if (docSnap.exists()) {
         setSingleDoc(docSnap.data());
-        console.log(singleDoc);
       }
     };
     fetchData();
+    console.log(singleDoc);
   }, [selectedId]);
 
-  // WOrks but only after editing VSCODE again. Solve the same problem previously by doing away with separate files, same file but not applicable here
+  useEffect(() => {
+    const uploadFile = () => {
+      const time = new Date().getTime();
+      const imageStorageRef = ref(storage, `/photo_${time}`);
+      const uploadTask = uploadBytesResumable(imageStorageRef, file, metadata);
+      uploadTask.on("state_changed", (snapshot) => {
+        getDownloadURL(uploadTask.snapshot.ref).then((downloadURL) => {
+          setImageURL(downloadURL);
+          // setId(new Date().getTime());
+          // console.log(id);
+        });
+      });
+    };
+    file && uploadFile();
+  }, [file]);
 
-  const handleSaveName = ({ value }) => {
-    value !== null && setName(value);
+  const handleUpload = async () => {
+    const docRef = doc(database, "posts", selectedId);
+    await updateDoc(docRef, { imageURL });
+    setSingleDoc({ ...singleDoc, imageURL });
   };
 
-  // becomes blank when refresh page
+  const deletePost = async () => {
+    const docRef = doc(database, "posts", selectedId);
+    await deleteDoc(docRef);
+    const showToastMessage = () => {
+      toast.success("Deleted!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    };
+
+    showToastMessage();
+    navigate("/");
+  };
+
+  // Updating name
+
+  const handleSaveName = ({ value }) => {
+    if (value !== "") {
+      setName(value);
+    }
+    return name;
+  };
+
   useEffect(() => {
-    console.log(name);
     const updateData = async () => {
       const docRef = doc(database, "posts", selectedId);
       updateDoc(docRef, { name: name });
@@ -121,6 +147,58 @@ function CreatedDossier({
     };
     updateData();
   }, [name]);
+
+  // Updating background
+
+  const handleSaveBackground = ({ value }) => {
+    if (value !== "") {
+      setBackground(value);
+    }
+  };
+
+  useEffect(() => {
+    // console.log(name);
+    const updateData = async () => {
+      const docRef = doc(database, "posts", selectedId);
+      updateDoc(docRef, { background: background });
+      setSingleDoc({ ...singleDoc, background: background });
+    };
+    updateData();
+  }, [background]);
+
+  // Updating preoccupations
+  const handleSavePreoccupations = ({ value }) => {
+    if (value !== "") {
+      setPreoccupations(value);
+    }
+  };
+
+  useEffect(() => {
+    // console.log(name);
+    const updateData = async () => {
+      const docRef = doc(database, "posts", selectedId);
+      updateDoc(docRef, { preoccupations: preoccupations });
+      setSingleDoc({ ...singleDoc, preoccupations: preoccupations });
+    };
+    updateData();
+  }, [preoccupations]);
+
+  // Updating engaging
+  const handleSaveEngagingHim = ({ value }) => {
+    if (value !== "") {
+      setEngagingHim(value);
+    }
+  };
+
+  useEffect(() => {
+    // console.log(name);
+    const updateData = async () => {
+      const docRef = doc(database, "posts", selectedId);
+      updateDoc(docRef, { engagingHim: engagingHim });
+      setSingleDoc({ ...singleDoc, engagingHim: engagingHim });
+    };
+    updateData();
+  }, [engagingHim]);
 
   return (
     <>
@@ -140,7 +218,17 @@ function CreatedDossier({
           height={350}
           width={620}
         />
-        <div onClick={() => setOpen(true)}>{<EditIcon />}</div>
+        <Grid
+          container
+          display="flex"
+          alignItems="center"
+          justifyContent="center"
+          direction="row"
+          margin={5}
+        >
+          <div onClick={() => setOpen(true)}>{<EditIcon />}</div>
+          <DeleteIcon onClick={deletePost} />
+        </Grid>
         {open && (
           <Modal
             open={open}
@@ -149,30 +237,21 @@ function CreatedDossier({
             aria-describedby="modal-modal-description"
           >
             <Box sx={style}>
+              {/* Editing image */}
               <img
                 src={`${singleDoc.imageURL}?w=100&fit=crop&auto=format`}
-                // srcSet={`${singleDoc.imageURL}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                alt={singleDoc.name}
+                alt={singleDoc.imageURL}
                 loading="lazy"
                 height={175}
                 width={310}
               />
-              {/* <React.Fragment>
-                <EditText
-                  // name="priceInput"
-                  type="string"
-                  style={{
-                    fontSize: "16px",
-                    border: "1px solid #ccc",
-                    marginBottom: "10px",
-                  }}
-                  defaultValue={singleDoc.name}
-                  onSave={handleSaveName}
-                  // formatDisplayText={formatPrice}
-                />
-              </React.Fragment> */}
-
+              <input
+                type="file"
+                onChange={(event) => setFile(event.target.files[0])}
+              ></input>
+              <button onClick={handleUpload}>Preview</button>
               <React.Fragment>
+                {/* Editing name */}
                 <EditText
                   name="textbox3"
                   type="string"
@@ -191,6 +270,10 @@ function CreatedDossier({
                   showEditButton
                 />
               </React.Fragment>
+              <ImageListItemBar
+                subtitle={<span>{singleDoc.country}</span>}
+                position="below"
+              />
               <List
                 sx={{
                   width: "100%",
@@ -203,11 +286,27 @@ function CreatedDossier({
                       <ImageIcon />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText
-                    primary="Background"
-                    secondary={singleDoc.background}
-                  />
+                  <React.Fragment>
+                    {/* Editing name */}
+                    <EditText
+                      name="textbox3"
+                      type="string"
+                      style={{ width: "250px" }}
+                      onSave={handleSaveBackground}
+                      defaultValue={
+                        <ListItemText
+                          primary="Background"
+                          secondary={singleDoc.background}
+                        />
+                      }
+                      editButtonProps={{
+                        style: { marginLeft: "5px", width: 16 },
+                      }}
+                      showEditButton
+                    />
+                  </React.Fragment>
                 </ListItem>
+
                 <Divider variant="inset" component="li" />
                 <ListItem>
                   <ListItemAvatar>
@@ -215,10 +314,25 @@ function CreatedDossier({
                       <WorkIcon />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText
-                    primary="Preoccupations"
-                    secondary={singleDoc.preoccupations}
-                  />
+
+                  <React.Fragment>
+                    <EditText
+                      name="textbox3"
+                      type="string"
+                      onSave={handleSavePreoccupations}
+                      style={{ width: "250px" }}
+                      defaultValue={
+                        <ListItemText
+                          primary="Preoccupations"
+                          secondary={singleDoc.preoccupations}
+                        />
+                      }
+                      editButtonProps={{
+                        style: { marginLeft: "5px", width: 16 },
+                      }}
+                      showEditButton
+                    />
+                  </React.Fragment>
                 </ListItem>
                 <Divider variant="inset" component="li" />
                 <ListItem>
@@ -227,10 +341,30 @@ function CreatedDossier({
                       <BeachAccessIcon />
                     </Avatar>
                   </ListItemAvatar>
-                  <ListItemText
+                  <React.Fragment>
+                    {/* Editing name */}
+                    <EditText
+                      name="textbox3"
+                      type="string"
+                      onSave={handleSaveEngagingHim}
+                      style={{ width: "250px" }}
+                      defaultValue={
+                        <ListItemText
+                          primary="Engaging Him"
+                          secondary={singleDoc.engagingHim}
+                        />
+                      }
+                      editButtonProps={{
+                        style: { marginLeft: "5px", width: 16 },
+                      }}
+                      showEditButton
+                    />
+                  </React.Fragment>
+
+                  {/* <ListItemText
                     primary="Engaging him"
                     secondary={singleDoc.engagingHim}
-                  />
+                  /> */}
                 </ListItem>
               </List>
             </Box>
@@ -245,6 +379,12 @@ function CreatedDossier({
             bgcolor: "background.paper",
           }}
         >
+          <ListItem>
+            <ListItemText
+              primary="Background"
+              secondary={singleDoc.background}
+            />
+          </ListItem>
           <ListItem>
             <ListItemAvatar>
               <Avatar>
@@ -280,6 +420,7 @@ function CreatedDossier({
               secondary={singleDoc.engagingHim}
             />
           </ListItem>
+          <CreatedGetNews />
         </List>
       </Grid>
     </>

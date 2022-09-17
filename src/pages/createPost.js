@@ -4,10 +4,8 @@ import { storage, database } from "../firebase.js";
 import { collection, addDoc, getDocs } from "firebase/firestore";
 import { ref, uploadBytesResumable, getDownloadURL } from "firebase/storage";
 import Grid from "@mui/material/Grid";
-import { toast } from "react-toastify";
+import { ToastContainer, toast } from "react-toastify";
 import "react-toastify/dist/ReactToastify.css";
-
-// toast.configure();
 
 const CreatePost = ({
   name,
@@ -52,19 +50,19 @@ const CreatePost = ({
     file && uploadFile();
   }, [file]);
 
-  const handleChange = (event) => {
-    setData({
-      ...data,
-      name: name,
-      country: country,
-      // id: id,
-      background: background,
-      preoccupations: preoccupations,
-      engagingHim: engagingHim,
-      imageURL: imageURL,
-    });
-    console.log(data);
-  };
+  // const handleChange = (event) => {
+  //   setData({
+  //     ...data,
+  //     name: name,
+  //     country: country,
+  //     // id: id,
+  //     background: background,
+  //     preoccupations: preoccupations,
+  //     engagingHim: engagingHim,
+  //     imageURL: imageURL,
+  //   });
+  //   console.log(data);
+  // };
 
   const handleUpload = async () => {
     const postsCollectionRef = collection(database, "posts");
@@ -87,8 +85,14 @@ const CreatePost = ({
 
     // localStorage.setItem("data", JSON.stringify(data));
 
+    const showToastMessage = () => {
+      toast.success("Successfully uploaded!", {
+        position: toast.POSITION.TOP_RIGHT,
+      });
+    };
+
+    showToastMessage();
     navigate("/");
-    toast("Uploaded");
   };
 
   return (

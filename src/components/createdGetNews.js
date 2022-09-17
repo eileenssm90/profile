@@ -15,71 +15,86 @@ import { CardActionArea } from "@mui/material";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import { Link } from "react-router-dom";
-import Checkbox from "@mui/material/Checkbox";
-import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
-import Favorite from "@mui/icons-material/Favorite";
+import { useParams } from "react-router-dom";
+import { collection, getDoc, doc, updateDoc } from "firebase/firestore";
+import { database, storage } from "../firebase.js";
 
 const label = { inputProps: { "aria-label": "Checkbox demo" } };
-
 const API = "a9d282904054416b9b3eef2b06a9aa30";
-
 var ourDate = new Date();
-// var pastDate = ourDate.getDate() - 7;
-// ourDate.setDate(pastDate);
-// console.log(ourDate);
 
-function handleClick(event) {
-  // selectedId = parseInt(event.currentTarget.id) - 1;
-  // console.log(selectedId);
-}
-
-const CreatedGetNews = ({ name }) => {
+const CreatedGetNews = () => {
   const [data, setData] = useState([]);
+  const [selectedId, setSelectedId] = useState("");
+  const [singleDoc, setSingleDoc] = useState({});
+
+  const params = useParams();
+
   useEffect(() => {
-    axios
-      .get(
-        `https://newsapi.org/v2/everything?q=${name}&from=${ourDate}&sortBy=publishedAt&apiKey=${API}`
-      )
-      .then((response) => {
-        setData(response.data.articles);
-        console.log(data);
-      });
-  }, []);
+    setSelectedId(String(params.id));
+  }, [selectedId]);
+
+  // why not downloading name - too slow, what is the dependency
+  useEffect(() => {
+    const fetchData = async () => {
+      const docRef = doc(database, "posts", selectedId);
+      const docSnap = await getDoc(docRef);
+      setSingleDoc(docSnap.data());
+    };
+    fetchData();
+    console.log(singleDoc);
+  }, [selectedId, singleDoc.name]);
+
+  useEffect(() => {
+    const fetchNews = () => {
+      axios
+        .get(
+          `https://newsapi.org/v2/everything?q=${singleDoc.name}&from=${ourDate}&sortBy=publishedAt&apiKey=${API}`
+        )
+        .then((response) => {
+          setData(response.data.articles);
+          console.log(response.data.articles);
+        });
+    };
+    fetchNews();
+  }, [selectedId, data]);
 
   return (
     <>
-      <Grid
-        container
-        columns={{ xs: 4, sm: 8, md: 12 }}
-        rowSpacing={1}
-        columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-        padding={10}
-        display="flex"
-        justifyContent="center"
-        gap={3}
-      >
-        {data.map((article) => {
-          return (
+      {data.map((article) => {
+        return (
+          <Grid
+            container
+            columns={{ xs: 4, sm: 8, md: 12 }}
+            rowSpacing={1}
+            columnSpacing={{ xs: 1, sm: 2, md: 3 }}
+            padding={10}
+            display="flex"
+            justifyContent="center"
+            gap={3}
+          >
             <div className="card">
               <Card sx={{ maxWidth: 345 }}>
                 <CardActionArea>
                   <CardMedia component="img" />
                   <ImageListItem display="block">
-                    <a href={article.url}>
+                    <Link to={article.url}>
                       <img
                         src={`${article.urlToImage}?w=248&fit=crop&auto=format`}
                         srcSet={`${article.urlToImage}?w=248&fit=crop&auto=format&dpr=2 2x`}
                         alt={article.title}
                         loading="lazy"
                         id={article.title}
-                        onClick={handleClick}
+                        onClick={() => {
+                          window.location.href = article.url;
+                        }}
                         resizemode="contain"
                         resizemethod="resize"
                         height={200}
                         width={340}
                         display="block"
                       />
-                    </a>
+                    </Link>
 
                     <CardContent>
                       <Grid container display="flex" direction="row">
@@ -105,59 +120,9 @@ const CreatedGetNews = ({ name }) => {
                 </CardActionArea>
               </Card>
             </div>
-
-            //   <Grid
-            //     container
-            //     columns={{ xs: 4, sm: 8, md: 12 }}
-            //     rowSpacing={1}
-            //     columnSpacing={{ xs: 1, sm: 2, md: 3 }}
-            //     padding={10}
-            //     display="flex"
-            //     justifyContent="center"
-            //     gap={3}
-            //   >
-            //     <div className="card">
-            //       <Card sx={{ maxWidth: 345 }}>
-            //         <CardActionArea>
-            //           <CardMedia />
-            //           <ImageListItem display="block">
-            //             <Link to={article.url}>
-            //               <img
-            //                 src={article.urlToImage}
-            //                 srcSet={`${article.urlToImage}?w=248&fit=crop&auto=format&dpr=2 2x`}
-            //                 alt={article.title}
-            //                 loading="lazy"
-            //                 id={article.title}
-            //                 //   onClick={handleClick}
-            //                 resizemode="contain"
-            //                 resizemethod="resize"
-            //                 height={200}
-            //                 width={340}
-            //                 display="block"
-            //               />
-            //             </Link>
-
-            //             <CardContent>
-            //               <Grid container display="flex" direction="row">
-            //                 <Grid item>
-            //                   <ImageListItemBar
-            //                     title={article.title}
-            //                     subtitle={<span>{article.description}</span>}
-            //                     position="below"
-            //                     display="block"
-            //                     overflow="hidden"
-            //                   />
-            //                 </Grid>
-            //               </Grid>
-            //             </CardContent>
-            //           </ImageListItem>
-            //         </CardActionArea>
-            //       </Card>
-            //     </div>
-            //   </Grid>
-          );
-        })}
-      </Grid>
+          </Grid>
+        );
+      })}
     </>
   );
 };

@@ -32,7 +32,7 @@ let selectedId = 0;
 export function DisplayGrid() {
   const [profileDatas, setProfileDatas] = useState(targets);
   const [searchTerm, setSearchTerm] = useState("");
-  const [fave, setFave] = useState([]);
+  const [fave, setFave] = useState("isNotFave");
   const [selected, setSelected] = useState(false);
 
   function handleChange(event) {

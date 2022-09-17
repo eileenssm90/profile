@@ -34,6 +34,8 @@ import { signOut } from "firebase/auth";
 import Badge from "@mui/material/Badge";
 import Avatar from "@mui/material/Avatar";
 import Stack from "@mui/material/Stack";
+import { ToastContainer, toast } from "react-toastify";
+import RequireAuth from "./components/requireAuth.js";
 
 function App() {
   const [name, setName] = useState("");
@@ -63,15 +65,24 @@ function App() {
     setAnchorElUser(null);
   };
 
+  const showToastMessage = () => {
+    toast.success("Logged out!", {
+      position: toast.POSITION.TOP_RIGHT,
+    });
+  };
+
   let signUserOut = () => {
     signOut(auth).then(() => {
       localStorage.clear();
       setIsAuth(false);
       window.location.pathname = "/login";
+      showToastMessage();
     });
   };
   return (
     <>
+      <ToastContainer />
+
       <Router>
         <AppBar position="static">
           <Grid container display="flex" flexDirection="row">
@@ -244,9 +255,18 @@ function App() {
             )}
           </Grid>
         </AppBar>
+
         <Routes>
-          <Route exact path="/" element={<Home id={id} setId={setId} />} />
-          <Route exact path="/dossier/:id" element={<Dossier />} />
+          <Route
+            exact
+            path="/"
+            element={<Home id={id} setId={setId} isAuth={isAuth} />}
+          />
+          <Route
+            exact
+            path="/dossier/:id"
+            element={<Dossier isAuth={isAuth} />}
+          />
           <Route
             exact
             path="/createddossier/:id"
@@ -266,30 +286,33 @@ function App() {
                 setPreoccupations={setPreoccupations}
                 engagingHim={engagingHim}
                 setEngagingHim={setEngagingHim}
+                isAuth={isAuth}
               />
             }
           />
-          <Route path="/favourite" element={<Favourite />} />
+          <Route path="/favourite" element={<Favourite isAuth={isAuth} />} />
 
           <Route
             path="/createpost"
             element={
-              <CreatePost
-                name={name}
-                setName={setName}
-                country={country}
-                setCountry={setCountry}
-                id={id}
-                setId={setId}
-                photo={photo}
-                setPhoto={setPhoto}
-                background={background}
-                setBackground={setBackground}
-                preoccupations={preoccupations}
-                setPreoccupations={setPreoccupations}
-                engagingHim={engagingHim}
-                setEngagingHim={setEngagingHim}
-              />
+              <RequireAuth isAuth={isAuth}>
+                <CreatePost
+                  name={name}
+                  setName={setName}
+                  country={country}
+                  setCountry={setCountry}
+                  id={id}
+                  setId={setId}
+                  photo={photo}
+                  setPhoto={setPhoto}
+                  background={background}
+                  setBackground={setBackground}
+                  preoccupations={preoccupations}
+                  setPreoccupations={setPreoccupations}
+                  engagingHim={engagingHim}
+                  setEngagingHim={setEngagingHim}
+                />
+              </RequireAuth>
             }
           />
           {/* <Route
@@ -305,7 +328,10 @@ function App() {
               />
             }
           /> */}
-          <Route path="/login" element={<Login setIsAuth={setIsAuth} />} />
+          <Route
+            path="/login"
+            element={<Login isAuth={isAuth} setIsAuth={setIsAuth} />}
+          />
 
           <Route path="*" element={<Error />} />
         </Routes>

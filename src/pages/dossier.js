@@ -14,7 +14,6 @@ import { useState, useEffect } from "react";
 import Typography from "@mui/material/Typography";
 import { useParams } from "react-router-dom";
 import GetNews from "../components/getNews.js";
-import Video from "../components/video.js";
 
 // import Checkbox from "@mui/material/Checkbox";
 // import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
@@ -118,7 +117,6 @@ function Dossier() {
               secondary={<ReadMore>{targets[id - 1].engaging}</ReadMore>}
             />
           </ListItem>
-          <Video />
           <GetNews id={id} />
         </List>
       </Grid>

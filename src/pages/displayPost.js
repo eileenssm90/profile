@@ -16,6 +16,7 @@ import Checkbox from "@mui/material/Checkbox";
 import FavoriteBorder from "@mui/icons-material/FavoriteBorder";
 import Favorite from "@mui/icons-material/Favorite";
 import { useParams } from "react-router-dom";
+import { selectedId } from "../components/displayGrid.js";
 
 // import OpenModal from "../components/openModal.js";
 
@@ -23,9 +24,28 @@ const label = { inputProps: { "aria-label": "Checkbox demo" } };
 
 function DisplayPost() {
   const [postList, setPostList] = useState({});
-  // const [singleDoc, setSingleDoc] = useState({});
+  const [faveArray, setFaveArray] = useState([]);
 
   const postsCollectionRef = collection(database, "posts");
+
+  const handleFaveClick = (event) => {
+    let selectedId = event.target.id;
+    // console.log(selectedId);
+    // let faveArray = [];
+    // let newFaveArray = [];
+    function remove(id) {
+      return id !== selectedId;
+    }
+    // if (faveArray.includes(selectedId)) {
+    //   newFaveArray = faveArray.filter(remove);
+    // } else {
+    // setFaveArray([...faveArray, selectedId]);
+    // setFaveArray({ ...faveArray, selectedId });
+
+    // }
+    console.log(faveArray);
+    return faveArray;
+  };
 
   useEffect(() => {
     const displayPost = () => {
@@ -35,7 +55,7 @@ function DisplayPost() {
       localStorage.setItem("postList", JSON.stringify(postList));
     };
     displayPost();
-  }, [postList.length]);
+  }, [postList]);
 
   return (
     <div>
@@ -80,17 +100,23 @@ function DisplayPost() {
                           position="below"
                         />
                       </Grid>
-                      <Grid item xs={2}>
+                      <Grid
+                        item
+                        xs={2}
+                        display="flex"
+                        flexDirection="row"
+                        alignContent="centre"
+                      >
                         <Checkbox
                           className="fas fa-download"
                           alignitems="center"
                           justifycontent="centre"
                           {...label}
                           id={post.id}
-                          // onClick={handleFaveClick}
+                          onClick={handleFaveClick}
                           icon={<FavoriteBorder />}
                           checkedIcon={<Favorite />}
-                        />{" "}
+                        />
                       </Grid>
                     </Grid>
                   </CardContent>

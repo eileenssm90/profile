@@ -39,10 +39,8 @@ const GetNews = ({ id }) => {
       });
   }, []);
 
-  function handleClick(event) {
-    // selectedId = parseInt(event.currentTarget.id) - 1;
-    // console.log(selectedId);
-  }
+  // function handleClick(article) {
+  // }
 
   function handleFaveClick(event) {
     // let selectedInteger = parseInt(event.target.id) - 1;
@@ -83,21 +81,24 @@ const GetNews = ({ id }) => {
                 <CardActionArea>
                   <CardMedia component="img" />
                   <ImageListItem display="block">
-                    <Link to={article.url}>
-                      <img
-                        src={`${article.urlToImage}?w=248&fit=crop&auto=format`}
-                        srcSet={`${article.urlToImage}?w=248&fit=crop&auto=format&dpr=2 2x`}
-                        alt={article.title}
-                        loading="lazy"
-                        id={article.title}
-                        onClick={handleClick}
-                        resizemode="contain"
-                        resizemethod="resize"
-                        height={200}
-                        width={340}
-                        display="block"
-                      />
-                    </Link>
+                    <img
+                      src={`${article.urlToImage}?w=248&fit=crop&auto=format`}
+                      srcSet={`${article.urlToImage}?w=248&fit=crop&auto=format&dpr=2 2x`}
+                      alt={article.title}
+                      loading="lazy"
+                      id={article.title}
+                      onClick={
+                        () => {
+                          window.location.href = article.url;
+                        }
+                        // console.log(article.url)
+                      }
+                      resizemode="contain"
+                      resizemethod="resize"
+                      height={200}
+                      width={340}
+                      display="block"
+                    />
 
                     <CardContent>
                       <Grid container display="flex" direction="row">
