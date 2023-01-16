@@ -1,4 +1,5 @@
 import * as React from "react";
+import { NavBar } from "../components/navBar.js";
 import ImageListItem from "@mui/material/ImageListItem";
 import ImageListItemBar from "@mui/material/ImageListItemBar";
 import { BrowserRouter as Router, Routes, Route, Link } from "react-router-dom";
@@ -56,8 +57,7 @@ function Favourite() {
 
   return (
     <>
-      {/* <nav>{NavBar()} </nav> */}
-
+      <nav>{NavBar()} </nav>
       <Grid
         container
         columns={{ xs: 4, sm: 8, md: 12 }}
